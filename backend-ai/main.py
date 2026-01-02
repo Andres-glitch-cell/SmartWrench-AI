@@ -1,37 +1,71 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware # 1. Importar el permiso
+from pymongo import MongoClient
+from fastapi.middleware.cors import CORSMiddleware
+import certifi
 
-app = FastAPI(title="SmartWrench AI API")
+app = FastAPI()
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "mensaje": "SmartWrench AI API está funcionando",
+        "instrucciones": "Usa la web en el puerto 8080 para realizar consultas."
+    }
 
-# 2. Configurar el permiso (CORS) para que tu web pueda entrar
+# Configuración de CORS para que tu navegador no bloquee la conexión
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Permite conexiones desde cualquier lugar (como Live Server)
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# --- CONEXIÓN A LA NUBE CORREGIDA ---
+uri = "mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/"
+
+try:
+    # Usamos certifi para evitar problemas de seguridad en Windows
+    client = MongoClient(uri, tlsCAFile=certifi.where())
+    # Nombre de la base de datos limpio (sin la URI dentro)
+    db = client['smartwrench_db']
+    collection = db['manuales']
+    print("✅ Servidor conectado a MongoDB Atlas con éxito")
+except Exception as e:
+    print(f"❌ Error de conexión en el servidor: {e}")
+
+# Modelo de datos que espera la API
 class Consulta(BaseModel):
-    empresa_id: str
-    licencia_key: str
     vehiculo_id: str
+    licencia_key: str
+    empresa_id: str
     pregunta: str
 
 @app.post("/diagnostico")
 async def diagnostico(data: Consulta):
+    # Verificación de seguridad simple
     if data.licencia_key != "SW-PRO-2024":
         raise HTTPException(status_code=401, detail="Licencia inválida")
 
+    # Búsqueda en MongoDB (insensible a mayúsculas/minúsculas)
+    query = {
+        "$or": [
+            {"marca": {"$regex": data.vehiculo_id, "$options": "i"}},
+            {"modelo": {"$regex": data.vehiculo_id, "$options": "i"}}
+        ]
+    }
+    
+    resultado = collection.find_one(query)
+
+    if resultado:
+        return {
+            "status": "success",
+            "pasos": resultado['especificaciones']['pasos'],
+            "fuente_oficial": resultado['especificaciones']['fuente']
+        }
+    
     return {
-        "status": "success",
-        "pasos": [
-            "1. Localizar los tornillos de la culata.",
-            "2. Seguir el orden de apriete en cruz.",
-            "3. Aplicar par inicial de 40 Nm.",
-            "4. Aplicar dos pases finales de 90 grados."
-        ],
-        "esquema_url": "https://ejemplo.com/esquema.png",
-        "fuente_oficial": f"Manual_Servicio_{data.vehiculo_id}_Pág_120.pdf"
+        "status": "error",
+        "pasos": ["Vehículo no localizado en la base de datos cloud.", "Sugerencia: Use par estándar de seguridad (40Nm)."],
+        "fuente_oficial": "Manuales SmartWrench"
     }

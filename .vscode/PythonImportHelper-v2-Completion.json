@@ -1,0 +1,95 @@
+[
+    {
+        "label": "MongoClient",
+        "importPath": "pymongo",
+        "description": "pymongo",
+        "isExtraImport": true,
+        "detail": "pymongo",
+        "documentation": {}
+    },
+    {
+        "label": "MongoClient",
+        "importPath": "pymongo",
+        "description": "pymongo",
+        "isExtraImport": true,
+        "detail": "pymongo",
+        "documentation": {}
+    },
+    {
+        "label": "certifi",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "certifi",
+        "description": "certifi",
+        "detail": "certifi",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "CORSMiddleware",
+        "importPath": "fastapi.middleware.cors",
+        "description": "fastapi.middleware.cors",
+        "isExtraImport": true,
+        "detail": "fastapi.middleware.cors",
+        "documentation": {}
+    },
+    {
+        "label": "obtener_conexion_db",
+        "kind": 2,
+        "importPath": "backend-ai.database_mongo",
+        "description": "backend-ai.database_mongo",
+        "peekOfCode": "def obtener_conexion_db():\n    \"\"\"\n    Establece la conexión con MongoDB Atlas y devuelve la colección.\n    \"\"\"\n    uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/\"\n    try:\n        # Conectamos usando el certificado de seguridad\n        client = MongoClient(uri, tlsCAFile=certifi.where())\n        db = client['smartwrench_db']\n        # Solo devolvemos la colección, ya no borramos ni insertamos nada",
+        "detail": "backend-ai.database_mongo",
+        "documentation": {}
+    },
+    {
+        "label": "Consulta",
+        "kind": 6,
+        "importPath": "backend-ai.main",
+        "description": "backend-ai.main",
+        "peekOfCode": "class Consulta(BaseModel):\n    vehiculo_id: str\n    licencia_key: str\n    empresa_id: str\n    pregunta: str\n@app.post(\"/diagnostico\")\nasync def diagnostico(data: Consulta):\n    # Verificación de seguridad simple\n    if data.licencia_key != \"SW-PRO-2024\":\n        raise HTTPException(status_code=401, detail=\"Licencia inválida\")",
+        "detail": "backend-ai.main",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "backend-ai.main",
+        "description": "backend-ai.main",
+        "peekOfCode": "app = FastAPI()\n@app.get(\"/\")\nasync def root():\n    return {\n        \"status\": \"online\",\n        \"mensaje\": \"SmartWrench AI API está funcionando\",\n        \"instrucciones\": \"Usa la web en el puerto 8080 para realizar consultas.\"\n    }\n# Configuración de CORS para que tu navegador no bloquee la conexión\napp.add_middleware(",
+        "detail": "backend-ai.main",
+        "documentation": {}
+    },
+    {
+        "label": "uri",
+        "kind": 5,
+        "importPath": "backend-ai.main",
+        "description": "backend-ai.main",
+        "peekOfCode": "uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/\"\ntry:\n    # Usamos certifi para evitar problemas de seguridad en Windows\n    client = MongoClient(uri, tlsCAFile=certifi.where())\n    # Nombre de la base de datos limpio (sin la URI dentro)\n    db = client['smartwrench_db']\n    collection = db['manuales']\n    print(\"✅ Servidor conectado a MongoDB Atlas con éxito\")\nexcept Exception as e:\n    print(f\"❌ Error de conexión en el servidor: {e}\")",
+        "detail": "backend-ai.main",
+        "documentation": {}
+    }
+]
