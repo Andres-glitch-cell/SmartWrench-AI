@@ -1,0 +1,41 @@
+body {
+    background: #1a1a1a;
+    color: white;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background: #333;
+    border: 1px solid #444;
+    color: white;
+}
+
+.chat-area {
+    background: #222;
+    min-height: 200px;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.mic-btn {
+    width: 100%;
+    padding: 15px;
+    background: #e74c3c;
+    border: none;
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+}

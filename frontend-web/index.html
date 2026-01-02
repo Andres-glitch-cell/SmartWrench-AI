@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SmartWrench AI - Taller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>SmartWrench AI</h1>
+            <span id="status">Licencia Activa</span>
+        </header>
+
+        <main>
+            <input type="text" id="vin" placeholder="Escanee VIN o Modelo (Paso 1)">
+            <div class="chat-area" id="chat">
+                <p>Pulse el micro para preguntar (Paso 2)...</p>
+            </div>
+            <button onclick="consultarIA()" class="mic-btn">🎤 Preguntar</button>
+        </main>
+    </div>
+    <script src="login.js"></script>
+</body>
+
+</html>
