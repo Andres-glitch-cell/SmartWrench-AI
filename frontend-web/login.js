@@ -54,7 +54,7 @@ document.getElementById('btnPreguntar').addEventListener('click', async () => {
         if (featMongo) featMongo.classList.add('scanning');
 
         // URL DEL TÚNEL (Recuerda actualizarla si reinicias localtunnel)
-        const tunnelURL = 'https://smart-singers-yawn.loca.lt/diagnostico';
+        const tunnelURL = 'http://localhost:8000/diagnostico';
 
         const response = await fetch(tunnelURL, {
             method: 'POST',

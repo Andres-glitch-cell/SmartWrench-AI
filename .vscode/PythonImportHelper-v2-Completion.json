@@ -33,19 +33,11 @@
         "documentation": {}
     },
     {
-        "label": "HTTPException",
+        "label": "Request",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
         "detail": "fastapi",
-        "documentation": {}
-    },
-    {
-        "label": "BaseModel",
-        "importPath": "pydantic",
-        "description": "pydantic",
-        "isExtraImport": true,
-        "detail": "pydantic",
         "documentation": {}
     },
     {
@@ -54,6 +46,24 @@
         "description": "fastapi.middleware.cors",
         "isExtraImport": true,
         "detail": "fastapi.middleware.cors",
+        "documentation": {}
+    },
+    {
+        "label": "uvicorn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uvicorn",
+        "description": "uvicorn",
+        "detail": "uvicorn",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
         "documentation": {}
     },
     {
@@ -66,20 +76,11 @@
         "documentation": {}
     },
     {
-        "label": "Consulta",
-        "kind": 6,
-        "importPath": "backend-ai.main",
-        "description": "backend-ai.main",
-        "peekOfCode": "class Consulta(BaseModel):\n    vehiculo_id: str\n    licencia_key: str\n    empresa_id: str\n    pregunta: str\n@app.post(\"/diagnostico\")\nasync def diagnostico(data: Consulta):\n    # Verificación de seguridad simple\n    if data.licencia_key != \"SW-PRO-2024\":\n        raise HTTPException(status_code=401, detail=\"Licencia inválida\")",
-        "detail": "backend-ai.main",
-        "documentation": {}
-    },
-    {
         "label": "app",
         "kind": 5,
         "importPath": "backend-ai.main",
         "description": "backend-ai.main",
-        "peekOfCode": "app = FastAPI()\n@app.get(\"/\")\nasync def root():\n    return {\n        \"status\": \"online\",\n        \"mensaje\": \"SmartWrench AI API está funcionando\",\n        \"instrucciones\": \"Usa la web en el puerto 8080 para realizar consultas.\"\n    }\n# Configuración de CORS para que tu navegador no bloquee la conexión\napp.add_middleware(",
+        "peekOfCode": "app = FastAPI()\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n# --- CONFIGURACIÓN NUCLEAR PARA EL ERROR SSL ---\nuri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/?retryWrites=true&w=majority\"",
         "detail": "backend-ai.main",
         "documentation": {}
     },
@@ -88,7 +89,7 @@
         "kind": 5,
         "importPath": "backend-ai.main",
         "description": "backend-ai.main",
-        "peekOfCode": "uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/\"\ntry:\n    # Usamos certifi para evitar problemas de seguridad en Windows\n    client = MongoClient(uri, tlsCAFile=certifi.where())\n    # Nombre de la base de datos limpio (sin la URI dentro)\n    db = client['smartwrench_db']\n    collection = db['manuales']\n    print(\"✅ Servidor conectado a MongoDB Atlas con éxito\")\nexcept Exception as e:\n    print(f\"❌ Error de conexión en el servidor: {e}\")",
+        "peekOfCode": "uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/?retryWrites=true&w=majority\"\ntry:\n    client = MongoClient(\n        uri,\n        tls=True,\n        tlsAllowInvalidCertificates=True, # ESTO ES LO MÁS IMPORTANTE\n        tlsCAFile=certifi.where(),\n        connectTimeoutMS=5000,\n        serverSelectionTimeoutMS=5000\n    )",
         "detail": "backend-ai.main",
         "documentation": {}
     }
