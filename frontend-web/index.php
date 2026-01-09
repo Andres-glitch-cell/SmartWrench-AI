@@ -13,7 +13,7 @@ $acceso_permitido = false;
 $error_msj = "";
 $empresa_display = "";
 
-// 2. LÓGICA DE VERIFICACIÓN TRIPLE (Formato -> Empresa:ID:Usuario)
+// 2. LÓGICA DE VERIFICACIÓN TRIPLE
 if (isset($_POST['login_string'])) {
     $entrada = explode(":", strtoupper(trim($_POST['login_string'])));
 
@@ -28,13 +28,13 @@ if (isset($_POST['login_string'])) {
                 $acceso_permitido = true;
                 $empresa_display = $emp_in;
             } else {
-                $error_msj = "PERMISO DENEGADO: ID o Usuario incorrectos.";
+                $error_msj = "ERROR: Credenciales inválidas para esta terminal.";
             }
         } else {
-            $error_msj = "PERMISO DENEGADO: Empresa no autorizada.";
+            $error_msj = "ERROR: Empresa no autorizada en el sistema.";
         }
     } else {
-        $error_msj = "FORMATO INVÁLIDO: Use Empresa:ID:Usuario";
+        $error_msj = "FORMATO REQUERIDO: EMPRESA:ID:USUARIO";
     }
 }
 ?>
@@ -45,175 +45,300 @@ if (isset($_POST['login_string'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartWrench AI - Acceso Industrial</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SmartWrench AI - Dashboard Técnico</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Estilos para el sistema de login triple */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        /* --- AJUSTES PARA EL SCROLL (MANTENIENDO TU ESTILO) --- */
+        html,
+        body {
             height: 100%;
-            background: rgba(10, 15, 20, 0.98);
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .app-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        .login-box {
-            background: #1a1f25;
-            padding: 40px;
-            border: 2px solid #00ff88;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.15);
-            text-align: center;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            flex: 1;
+            height: calc(100vh - 160px);
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
         }
 
-        .error-box {
-            background: rgba(255, 68, 68, 0.1);
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            text-transform: uppercase;
+        .display-area {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        .login-input {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            margin: 15px 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            text-align: center;
+        .terminal-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
-        .login-input:focus {
-            outline: none;
-            border-color: #00ff88;
+        .terminal-body {
+            flex: 1;
+            overflow-y: auto !important;
+            scroll-behavior: auto;
         }
 
-        .hint {
-            color: #8b949e;
-            font-size: 0.7rem;
-            margin-top: 10px;
+        .no-manual-scroll {
+            overflow-y: hidden !important;
+        }
+
+        /* Estilos para el texto formateado de la IA */
+        .ia-content b {
+            color: #00ffcc;
+            font-weight: 700;
+        }
+
+        .ia-content i {
+            color: #ffcc00;
+            font-style: italic;
+        }
+
+        .ia-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
         }
     </style>
 </head>
 
-<body>
+<body class="<?php echo !$acceso_permitido ? 'lock-screen' : ''; ?>">
 
     <?php if (!$acceso_permitido): ?>
         <div class="login-overlay">
-            <div class="login-box">
-                <h2 style="color: #00ff88; font-family: 'Orbitron'; letter-spacing: 2px;">ACCESO OEM</h2>
-                <p style="color: #8b949e; margin-bottom: 20px;">Autenticación por Empresa, ID y Usuario</p>
+            <div class="login-card">
+                <div class="login-header">
+                    <span class="lock-icon">🔒</span>
+                    <h2>SISTEMA OEM</h2>
+                    <p>AUTENTICACIÓN DE SEGURIDAD REQUERIDA</p>
+                </div>
 
                 <?php if ($error_msj): ?>
-                    <div class="error-box"><?php echo $error_msj; ?></div>
+                    <div class="error-banner"><?php echo $error_msj; ?></div>
                 <?php endif; ?>
 
-                <form method="POST" action="">
-                    <input type="text" name="login_string" class="login-input" placeholder="EMPRESA:ID:USUARIO" required
-                        autofocus autocomplete="off">
-                    <button type="submit" class="action-btn" style="width: 100%;">
-                        VERIFICAR CREDENCIALES
-                    </button>
+                <form method="POST">
+                    <div class="input-field">
+                        <input type="text" name="login_string" placeholder="EMPRESA:ID:USUARIO" required autofocus
+                            autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary full-width">ESTABLECER CONEXIÓN</button>
                 </form>
-                <p class="hint">Ejemplo: TOYOTA:X342:toyota</p>
+                <p class="login-hint">EJEMPLO: TOYOTA:T-800:admin_toyota</p>
             </div>
         </div>
     <?php endif; ?>
 
-    <div class="container" style="<?php echo !$acceso_permitido ? 'filter: blur(10px); pointer-events: none;' : ''; ?>">
-        <header>
-            <div class="logo-section">
-                <h1>SMARTWRENCH <span class="ai-badge">AI</span></h1>
-                <p class="subtitle">SISTEMA DE ASISTENCIA TÉCNICA AVANZADA</p>
-                <?php if ($acceso_permitido): ?>
-                    <p style="color: #00ff88; font-size: 0.8rem; margin-top: 5px; font-family: 'Orbitron';">
-                        SESIÓN ACTIVA: [ <?php echo $empresa_display; ?> ]
-                    </p>
-                <?php endif; ?>
-            </div>
-            <div class="system-stats">
-                <div class="stat">
-                    <span class="label">SERVIDOR:</span>
-                    <span class="value online">CONECTADO</span>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="brand">
+                <h1>SMARTWRENCH <span class="badge-ai">AI</span></h1>
+                <div class="session-info">
+                    <span class="pulse-dot"></span>
+                    TERMINAL ACTIVA: <strong><?php echo $empresa_display ?: 'MODO_ESPERA'; ?></strong>
                 </div>
-                <div class="stat">
-                    <span class="label">MODELO:</span>
-                    <span class="value">v2.4-Turbo</span>
+            </div>
+
+            <div class="system-status">
+                <div class="status-pill">
+                    <span class="label">SERVER</span>
+                    <span class="value online">LIVE</span>
+                </div>
+                <div class="status-pill">
+                    <span class="label">CORE</span>
+                    <span class="value">v3.0-FLASH</span>
                 </div>
             </div>
         </header>
 
-        <main>
-            <section class="control-panel">
-                <div class="input-group">
-                    <label for="vin">IDENTIFICACIÓN DEL VEHÍCULO</label>
-                    <input type="text" id="vin" placeholder="VIN o Modelo del vehículo...">
+        <main class="grid-layout">
+            <aside class="side-panel">
+                <div class="panel-card">
+                    <h3>🔍 ENTRADA DE DATOS</h3>
+                    <div class="input-block">
+                        <label>DESCRIPCIÓN DE LA AVERÍA</label>
+                        <textarea id="vin" placeholder="Escribe aquí el código de error o síntoma..."></textarea>
+                    </div>
+
+                    <div class="input-block">
+                        <label>EVIDENCIA FOTOGRÁFICA</label>
+                        <div class="upload-zone" onclick="document.getElementById('foto_averia').click()">
+                            <span class="upload-icon">📸</span>
+                            <span id="file-name">ADJUNTAR IMAGEN TÉCNICA</span>
+                            <input type="file" id="foto_averia" accept="image/*" style="display:none">
+                        </div>
+                    </div>
+
+                    <div class="status-list">
+                        <div class="status-item" id="led-pdf"><span class="dot"></span> PDF Manuals Engine</div>
+                        <div class="status-item" id="led-ocr"><span class="dot"></span> Vision Computer OCR</div>
+                        <div class="status-item" id="led-cloud"><span class="dot"></span> Cloud Data Sync</div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <button id="btnPreguntar" class="btn-primary">
+                            <span>🤖</span> INICIAR
+                        </button>
+                        <button id="btnManual" class="btn-secondary">
+                            <span>📖</span> GUÍA OEM
+                        </button>
+                    </div>
                 </div>
+            </aside>
 
-                <div class="ai-features">
-                    <div class="feature-item" id="feat-oem">
-                        <span class="status-dot"></span>
-                        <span class="feature-text">Análisis de Manuales OEM</span>
+            <section class="display-area">
+                <div class="terminal-window">
+                    <div class="terminal-top">
+                        <div class="window-controls">
+                            <span class="win-dot close"></span>
+                            <span class="win-dot min"></span>
+                            <span class="win-dot max"></span>
+                        </div>
+                        <div class="terminal-title">SMARTWRENCH_CONSOLE.EXE</div>
                     </div>
-                    <div class="feature-item" id="feat-torque">
-                        <span class="status-dot"></span>
-                        <span class="feature-text">Cálculo de Pares de Apriete</span>
-                    </div>
-                    <div class="feature-item" id="feat-mongo">
-                        <span class="status-dot"></span>
-                        <span class="feature-text">Motor MongoDB Cloud</span>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button id="btnPreguntar" class="action-btn">
-                        <span class="icon">🤖</span> ANALIZAR CON IA
-                    </button>
-
-                    <button id="btnManual" class="action-btn secondary">
-                        <span class="icon">📖</span> MANUAL USO
-                    </button>
-                </div>
-
-            </section>
-
-            <section class="display-panel">
-                <div class="chat-area" id="chat">
-                    <div class="terminal-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="terminal-title">TERMINAL DE DIAGNÓSTICO</span>
-                    </div>
-                    <div id="output">
-                        <p class="cursor">Esperando entrada de datos...</p>
+                    <div class="terminal-body" id="output">
+                        <p class="typing-text">SISTEMA INICIALIZADO. ESPERANDO CONSULTA...</p>
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer>
-            <p>© 2026 SmartWrench AI | Licencia: <span id="licencia">SW-PRO-2024</span> | Datos basados en normativas
-                ISO/DIN</p>
+        <footer class="main-footer">
+            <div class="footer-left">© 2026 SmartWrench AI | ENGINE: GEMINI-3</div>
+            <div class="footer-right">LICENCIA: <strong>SW-PRO-2024</strong></div>
         </footer>
     </div>
-    <script src="login.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+
+        // Función para abrir manual OEM
+        document.getElementById('btnManual').addEventListener('click', () => {
+            alert("Accediendo a la base de datos de manuales OEM...");
+            // Aquí podrías poner: window.open('ruta/al/manual.pdf', '_blank');
+        });
+
+        function scrollToBottom() {
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function updateStatusLeds(state) {
+            const leds = ['led-pdf', 'led-ocr', 'led-cloud'];
+            leds.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('led-green', 'led-yellow', 'led-red');
+            });
+
+            for (const id of leds) {
+                await new Promise(resolve => setTimeout(resolve, 400));
+                const el = document.getElementById(id);
+                if (state === 'success') el.classList.add('led-green');
+                if (state === 'warning') el.classList.add('led-yellow');
+                if (state === 'error') el.classList.add('led-red');
+            }
+        }
+
+        function formatText(text) {
+            return text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>');
+        }
+
+        function typeEffect(element, rawText, speed = 10) {
+            let i = 0;
+            let currentHTML = "<strong>[DIAGNÓSTICO FINAL]</strong><br><br>";
+            output.classList.add('no-manual-scroll');
+            const formattedText = formatText(rawText);
+
+            function typing() {
+                if (i < formattedText.length) {
+                    if (formattedText.charAt(i) === '<') {
+                        let tag = '';
+                        while (formattedText.charAt(i) !== '>') {
+                            tag += formattedText.charAt(i);
+                            i++;
+                        }
+                        tag += '>';
+                        i++;
+                        currentHTML += tag;
+                    } else {
+                        currentHTML += formattedText.charAt(i);
+                        i++;
+                    }
+                    element.innerHTML = currentHTML;
+                    output.scrollTop = output.scrollHeight;
+                    setTimeout(typing, speed);
+                } else {
+                    output.classList.remove('no-manual-scroll');
+                    scrollToBottom();
+                }
+            }
+            typing();
+        }
+
+        document.getElementById('foto_averia').addEventListener('change', function () {
+            const name = this.files[0] ? this.files[0].name : "ADJUNTAR IMAGEN TÉCNICA";
+            document.getElementById('file-name').innerText = name.toUpperCase();
+        });
+
+        document.getElementById('btnPreguntar').addEventListener('click', async () => {
+            const pregunta = document.getElementById('vin').value;
+            const fileInput = document.getElementById('foto_averia');
+
+            if (!pregunta) {
+                output.innerHTML = '<p class="text-error">⚠️ ERROR: INGRESE UNA CONSULTA VÁLIDA.</p>';
+                updateStatusLeds('warning');
+                return;
+            }
+
+            output.innerHTML = '<p class="typing-text">INICIANDO SECUENCIA DE ANÁLISIS... COMPROBANDO MÓDULOS...</p>';
+            scrollToBottom();
+
+            const formData = new FormData();
+            formData.append('pregunta', pregunta);
+            if (fileInput.files[0]) formData.append('archivo', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/diagnostico_avanzado', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    await updateStatusLeds('success');
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = "ia-content";
+                    output.innerHTML = "";
+                    output.appendChild(contentDiv);
+                    typeEffect(contentDiv, data.analisis);
+                } else {
+                    await updateStatusLeds('error');
+                    output.innerHTML = `<p class="text-error">❌ ERROR CRÍTICO: ${data.analisis}</p>`;
+                }
+            } catch (error) {
+                await updateStatusLeds('error');
+                output.innerHTML = '<p class="text-error">❌ ERROR DE CONEXIÓN: MOTOR OFF-LINE.</p>';
+                scrollToBottom();
+            }
+        });
+    </script>
 </body>
 
 </html>

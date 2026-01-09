@@ -1,298 +1,557 @@
 /* --- 1. CONFIGURACIÓN Y VARIABLES --- */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
-
 :root {
     --primary-red: #ff4b2b;
     --primary-green: #00ff88;
     --primary-amber: #ffaa00;
-    --dark-bg: #0f0f0f;
-    --panel-bg: #1a1a1a;
-    --border-color: #333;
-    --neon-shadow: 0 0 15px rgba(255, 75, 43, 0.3);
+    --dark-bg: #0a0c10;
+    --panel-bg: #161b22;
+    --card-bg: #0d1117;
+    --border-color: #30363d;
+    --text-main: #c9d1d9;
+    --text-dim: #8b949e;
+    --font-main: 'Roboto', sans-serif;
+    --font-tech: 'Orbitron', sans-serif;
+    --font-code: 'JetBrains Mono', monospace;
 }
 
 /* --- 2. BASE Y ESTRUCTURA --- */
 body {
     background-color: var(--dark-bg);
-    color: #e0e0e0;
-    font-family: 'Roboto', sans-serif;
+    color: var(--text-main);
+    font-family: var(--font-main);
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
+    /* AJUSTE 1: Altura fija para que el scroll ocurra dentro */
+    overflow: hidden;
+    /* AJUSTE 2: Evita que el fondo se mueva */
 }
 
-.container {
+/* Estado de pantalla bloqueada (Login) */
+body.lock-screen .app-container {
+    filter: blur(8px);
+    pointer-events: none;
+    user-select: none;
+}
+
+.app-container {
     width: 95%;
-    max-width: 900px;
-    background: var(--panel-bg);
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-}
-
-/* --- 3. HEADER Y STATS --- */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid var(--primary-red);
-    padding-bottom: 20px;
-    margin-bottom: 30px;
-}
-
-h1 {
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 2px;
-    margin: 0;
-    font-size: 1.8rem;
-}
-
-.ai-badge {
-    color: var(--primary-red);
-    text-shadow: var(--neon-shadow);
-}
-
-.subtitle {
-    font-size: 0.7rem;
-    color: #666;
-    margin: 5px 0 0 0;
-    letter-spacing: 1px;
-}
-
-.system-stats {
-    text-align: right;
-    font-size: 0.75rem;
-    font-family: 'Orbitron', sans-serif;
-}
-
-.label {
-    color: #555;
-    margin-right: 5px;
-}
-
-.online {
-    color: var(--primary-green);
-    animation: blink 2s infinite;
-}
-
-/* --- 4. LAYOUT PRINCIPAL --- */
-main {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 25px;
-}
-
-@media (max-width: 768px) {
-    main {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* --- 5. INDICADORES (FEATURES) --- */
-.ai-features {
+    max-width: 1200px;
+    height: 90vh;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 20px;
+    transition: filter 0.3s ease;
 }
 
-.feature-item {
+/* --- 3. LOGIN OVERLAY --- */
+.login-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
     display: flex;
+    justify-content: center;
     align-items: center;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #333;
-    opacity: 0.4;
-    transition: all 0.5s ease;
+    backdrop-filter: blur(4px);
 }
 
-/* Estados de los indicadores */
-.feature-item.active {
-    opacity: 1;
-    transform: translateX(5px);
-    border-color: var(--primary-green);
+.login-card {
+    background: var(--panel-bg);
+    padding: 40px;
+    border: 1px solid var(--primary-green);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
 }
 
-.feature-item.scanning {
-    opacity: 1;
-    color: var(--primary-amber);
-    border-color: var(--primary-amber);
+.login-header h2 {
+    font-family: var(--font-tech);
+    color: var(--primary-green);
+    margin: 10px 0;
 }
 
-.status-dot {
-    height: 8px;
-    width: 8px;
-    background-color: #555;
-    border-radius: 50%;
-    margin-right: 12px;
-    transition: all 0.3s;
-}
-
-.active .status-dot {
-    background-color: var(--primary-green);
-    box-shadow: 0 0 10px var(--primary-green);
-    animation: pulse-dot 1s infinite;
-}
-
-.scanning .status-dot {
-    background-color: var(--primary-amber);
-    box-shadow: 0 0 10px var(--primary-amber);
-}
-
-.feature-text {
+.error-banner {
+    background: rgba(255, 75, 43, 0.1);
+    color: var(--primary-red);
+    padding: 10px;
+    border: 1px solid var(--primary-red);
+    margin-bottom: 20px;
     font-size: 0.8rem;
     font-weight: bold;
-    letter-spacing: 0.5px;
 }
 
-/* --- 6. FORMULARIO Y BOTONES --- */
-.input-group {
-    margin-bottom: 25px;
+/* --- 4. HEADER --- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
 }
 
-.input-group label {
-    font-size: 0.75rem;
-    color: #888;
-    margin-bottom: 10px;
-    display: block;
+.brand h1 {
+    font-family: var(--font-tech);
+    margin: 0;
+    font-size: 2rem;
+    letter-spacing: 3px;
 }
 
-input {
-    width: 100%;
-    padding: 15px;
-    background: #000;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
+.badge-ai {
     color: var(--primary-red);
-    font-family: 'Orbitron', sans-serif;
-    box-sizing: border-box;
-    outline: none;
+    text-shadow: 0 0 10px rgba(255, 75, 43, 0.5);
 }
 
-/* Grupo de botones en paralelo */
-.button-group {
-    display: flex;
-    gap: 10px;
-    width: 100%;
+.status-pill {
+    display: inline-flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-family: var(--font-tech);
+    margin-left: 10px;
 }
 
-.action-btn {
-    flex: 1;
-    height: 55px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(45deg, #ff4b2b, #ff416c);
-    border: none;
-    color: white;
+.status-pill .label {
+    color: var(--text-dim);
+    margin-right: 8px;
+}
+
+.status-pill .online {
+    color: var(--primary-green);
+    animation: pulse 2s infinite;
+}
+
+/* --- 5. GRID LAYOUT --- */
+.grid-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 20px;
+    flex-grow: 1;
+    min-height: 0;
+    /* AJUSTE 3: Clave técnica para activar el scroll interno */
+    overflow: hidden;
+}
+
+.panel-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    transition: all 0.3s ease;
-}
-
-.action-btn.secondary {
-    background: linear-gradient(45deg, #333, #444);
-    border: 1px solid #555;
-}
-
-.action-btn:hover {
-    box-shadow: 0 0 20px rgba(255, 75, 43, 0.5);
-    transform: translateY(-2px);
-}
-
-.action-btn.secondary:hover {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-    background: #444;
-}
-
-/* --- 7. TERMINAL DE SALIDA --- */
-.chat-area {
-    background: #050505;
-    border-radius: 10px;
-    border: 1px solid #333;
-    height: 380px;
+    padding: 20px;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    /* Tu regla de scroll original */
+    overflow-x: hidden;
 }
 
-.terminal-header {
-    background: #1a1a1a;
-    padding: 15px;
+.panel-card h3 {
+    font-family: var(--font-tech);
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--primary-amber);
+}
+
+/* --- 6. INPUTS Y BOTONES --- */
+.input-block label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+textarea {
+    width: 90%;
+    height: 100px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 12px;
+    border-radius: 4px;
+    resize: none;
+    outline: none;
+    font-family: var(--font-main);
+}
+
+textarea:focus {
+    border-color: var(--primary-red);
+}
+
+.upload-zone {
+    border: 1px dashed var(--border-color);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 4px;
+}
+
+.upload-zone:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: var(--text-dim);
+}
+
+.btn-primary {
+    margin-right: 2%;
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    padding: 10px;
+    font-family: var(--font-tech);
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+    width: 50%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    font-family: var(--font-tech);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* --- 7. TERMINAL WINDOW --- */
+.terminal-window {
+    background: #0d1117;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.terminal-top {
+    background: #161b22;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #333;
+    gap: 20px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
+.window-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.win-dot {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
 }
 
-.red {
+.win-dot.close {
     background: #ff5f56;
 }
 
-.yellow {
+.win-dot.min {
     background: #ffbd2e;
 }
 
-.green {
+.win-dot.max {
     background: #27c93f;
 }
 
 .terminal-title {
+    font-family: var(--font-code);
     font-size: 0.7rem;
-    color: #555;
-    font-family: 'Orbitron';
+    color: var(--text-dim);
 }
 
-#output {
+.terminal-body {
     padding: 20px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-code);
     color: var(--primary-green);
+    font-size: 0.95rem;
     overflow-y: auto;
-    font-size: 0.9rem;
+    flex-grow: 1;
+    line-height: 1.5;
 }
 
-/* --- 8. ANIMACIONES --- */
-@keyframes blink {
+/* --- 8. ANIMACIONES Y LIMPIEZA --- */
+.typing-text::after {
+    content: "|";
+    animation: blink 1s infinite;
+}
 
-    0%,
-    100% {
+.ia-content {
+    color: var(--text-main);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.text-error {
+    color: var(--primary-red);
+    font-weight: bold;
+}
+
+@keyframes pulse {
+    0% {
         opacity: 1;
     }
 
     50% {
         opacity: 0.3;
     }
-}
-
-@keyframes pulse-dot {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.3);
-    }
 
     100% {
-        transform: scale(1);
+        opacity: 1;
     }
 }
 
-footer {
-    margin-top: 30px;
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 9. INDICADORES --- */
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.status-item {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    padding: 5px;
+    border-radius: 6px;
+    border-left: 3px solid #333;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: var(--font-code);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-item .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 50%;
+}
+
+.status-item.active .dot {
+    background: var(--primary-green);
+    box-shadow: 0 0 8px var(--primary-green);
+}
+
+/* --- SCROLLBARS PERSONALIZADOS (TU ESTILO) --- */
+.terminal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+    background: var(--card-bg);
+    border-radius: 6px;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+    background: var(--primary-red);
+    border-radius: 6px;
+    border: 2px solid var(--card-bg);
+}
+
+/* Suavizado global */
+html,
+body,
+.terminal-body,
+.panel-card {
+    scroll-behavior: smooth;
+}
+
+/* --- ESTADOS DE LOS LEDS --- */
+.status-item .dot {
+    width: 8px;
+    height: 8px;
+    background: #333;
+    /* Apagado por defecto */
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 2px #000;
+}
+
+/* LED VERDE: Funcionamiento correcto */
+.status-item.led-green .dot {
+    background: var(--primary-green);
+    box-shadow: 0 0 10px var(--primary-green), 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.status-item.led-green {
+    color: var(--primary-green);
+}
+
+/* LED AMARILLO: Fallo menor o advertencia */
+.status-item.led-yellow .dot {
+    background: var(--primary-amber);
+    box-shadow: 0 0 10px var(--primary-amber), 0 0 20px rgba(255, 170, 0, 0.2);
+}
+
+.status-item.led-yellow {
+    color: var(--primary-amber);
+}
+
+/* LED ROJO: Error crítico */
+.status-item.led-red .dot {
+    background: var(--primary-red);
+    box-shadow: 0 0 10px var(--primary-red), 0 0 20px rgba(255, 75, 43, 0.2);
+}
+
+.status-item.led-red {
+    color: var(--primary-red);
+}
+
+/* Animación sutil de parpadeo para los activos */
+.status-item[class*="led-"] .dot {
+    animation: led-pulse 2s infinite alternate;
+}
+
+@keyframes led-pulse {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.7;
+    }
+}
+
+/* --- 10. ESTILOS ESPECÍFICOS PARA EL LOGIN (MODO OEM) --- */
+
+/* Contenedor principal de la entrada */
+.login-card form {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Campo de entrada de texto (EMPRESA:ID:USUARIO) */
+.login-card .input-field input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    color: var(--primary-green);
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
     text-align: center;
-    font-size: 0.65rem;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.login-card .input-field input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+/* Placeholder personalizado para el login */
+.login-card .input-field input::placeholder {
     color: #444;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* Botón de Establecer Conexión (Ajuste de ancho completo) */
+.login-card .full-width {
+    width: 100% !important;
+    margin: 0;
+    padding: 15px;
+    letter-spacing: 3px;
+    font-size: 1rem;
+    border: 1px solid var(--primary-red);
+}
+
+/* Icono de candado con animación */
+.lock-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px var(--primary-green));
+    animation: lock-glow 3s infinite alternate;
+}
+
+/* Nota de ejemplo inferior */
+.login-hint {
+    margin-top: 20px;
+    font-family: var(--font-code);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+    letter-spacing: 1px;
+}
+
+/* Animación para el icono de seguridad */
+@keyframes lock-glow {
+    from {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    to {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Ajuste para el Banner de Error */
+.error-banner {
+    border-radius: 4px;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
 }

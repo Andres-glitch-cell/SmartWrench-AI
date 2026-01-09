@@ -1,148 +1,152 @@
-/* ! Función para abrir el Manual */
+/* ! Función para abrir el Manual (Acceso Directo Windows) */
 function openManual() {
-    const elementoID = document.getElementById("btnManual")
-    elementoID.addEventListener("click", () => {
-        window.location.href = "SmartWrenchIA-Manual.pdf"
-    })
+    const elementoID = document.getElementById("btnManual");
+    if (elementoID) {
+        elementoID.onclick = () => {
+            // Abre el PDF en una nueva pestaña
+            window.open("SmartWrenchIA-Manual.pdf", "_blank");
+        };
+    }
 }
 
-window.onload = openManual
-
-// --- FUNCIÓN PARA EFECTO DE ESCRITURA (SIMULACIÓN IA) ---
+// --- FUNCIÓN PARA EFECTO DE ESCRITURA ---
 function escribirLento(elemento, texto) {
     return new Promise((resolve) => {
         let i = 0;
         elemento.innerHTML = "";
+        // Eliminamos caracteres de formato Markdown para una salida tipo terminal limpia
+        const textoLimpio = texto.replace(/[*#_~]/g, ''); 
+        
         const timer = setInterval(() => {
-            elemento.innerHTML += texto.charAt(i);
-            i++;
-            if (i >= texto.length) {
+            if (i < textoLimpio.length) {
+                elemento.innerHTML += textoLimpio.charAt(i);
+                i++;
+                // Hacemos scroll automático en el contenedor de salida
+                const chatArea = document.getElementById('output');
+                if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+            } else {
                 clearInterval(timer);
                 resolve();
             }
-        }, 20);
+        }, 15); // Velocidad de terminal técnica
     });
 }
 
 document.getElementById('btnPreguntar').addEventListener('click', async () => {
-    const vin = document.getElementById('vin').value;
+    const vinInput = document.getElementById('vin');
+    const vin = vinInput.value.trim(); // Limpiamos espacios
     const output = document.getElementById('output');
+    
+    const fotoInput = document.getElementById('foto_averia'); 
+    const foto = fotoInput ? fotoInput.files[0] : null;
 
-    // Referencias a los indicadores del panel de características
     const featOEM = document.getElementById('feat-oem');
     const featTorque = document.getElementById('feat-torque');
     const featMongo = document.getElementById('feat-mongo');
+    const features = [featOEM, featTorque, featMongo];
 
-    if (!vin) {
-        output.innerHTML = "<p style='color: #ff4b2b;'>⚠️ Error: Se requiere identificación del vehículo.</p>";
+    // Validación de entrada técnica
+    if (!vin && !foto) {
+        output.innerHTML = `
+            <div style="color: #ff4b2b; font-family: 'Orbitron'; padding: 10px; border: 1px solid #ff4b2b; background: rgba(255,75,43,0.1);">
+                ⚠️ SISTEMA: REQUIERE ENTRADA DE TEXTO O EVIDENCIA VISUAL.
+            </div>`;
         return;
     }
 
-    // 1. RESET Y ESTADO INICIAL
-    // Apagamos las luces de los módulos para iniciar el escaneo
-    [featOEM, featTorque, featMongo].forEach(f => {
-        if (f) f.classList.remove('active', 'scanning');
+    // 1. INICIAR PROTOCOLO DE ESCANEO (UI)
+    features.forEach(f => {
+        if (f) { 
+            f.style.opacity = "1";
+            f.classList.add('scanning'); 
+            f.classList.remove('active');
+        }
     });
 
     output.innerHTML = `
-        <p class="typing">🔍 Escaneando bases de datos OEM...</p>
-        <p class="typing">🧠 Identificando motorización para ${vin.toUpperCase()}...</p>
+        <div class="scanning-loader" style="font-family: 'Courier New'; color: #00ff88; font-size: 0.85rem;">
+            <p>📡 ESTABLECIENDO CONEXIÓN CON MOTOR IA (PUERTO 8000)...</p>
+            <p>📂 INDEXANDO BASE DE DATOS LOCAL /DOCS...</p>
+            <p>🧠 PROCESANDO CONSULTA CON GEMINI 1.5 FLASH...</p>
+            <p>☁️ SINCRONIZANDO CON MONGODB CLOUD...</p>
+        </div>
     `;
 
     try {
-        // --- ACTIVACIÓN MÓDULO MONGODB ---
-        if (featMongo) featMongo.classList.add('scanning');
+        const formData = new FormData();
+        // Si no hay texto pero hay foto, enviamos una pregunta por defecto
+        formData.append('pregunta', vin || "Analiza la imagen adjunta y diagnostica posibles fallos.");
+        
+        if (foto) {
+            formData.append('archivo', foto);
+        }
 
-        // URL DEL TÚNEL (Recuerda actualizarla si reinicias localtunnel)
-        const tunnelURL = 'http://localhost:8000/diagnostico';
-
-        const response = await fetch(tunnelURL, {
+        // Llamada al backend de Python en Windows
+       const response = await fetch('http://127.0.0.1:8000/diagnostico_avanzado', {
             method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Bypass-Tunnel-Reminder': 'true'
-            },
-            body: JSON.stringify({
-                empresa_id: "Taller_Andres",
-                licencia_key: "SW-PRO-2024",
-                vehiculo_id: vin,
-                pregunta: "procedimiento general"
-            })
+            body: formData
         });
 
-        if (!response.ok) throw new Error(`Error de red: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`Error de Servidor: ${response.status}`);
+        }
 
         const data = await response.json();
 
-        // --- MÓDULO MONGODB COMPLETADO Y ACTIVACIÓN OEM ---
-        if (featMongo) {
-            featMongo.classList.remove('scanning');
-            featMongo.classList.add('active');
-        }
-        if (featOEM) featOEM.classList.add('scanning');
-
-        // 2. PROCESO DE RENDERIZADO LETRA POR LETRA
-        setTimeout(async () => {
-            if (data.status === "success" || data.pasos) {
-
-                // --- MÓDULO OEM COMPLETADO Y ACTIVACIÓN CÁLCULO ---
-                if (featOEM) {
-                    featOEM.classList.remove('scanning');
-                    featOEM.classList.add('active');
-                }
-                if (featTorque) featTorque.classList.add('active');
-
-                // Creamos la estructura base del reporte
-                output.innerHTML = `
-                    <div class="res-card">
-                        <h3 style="color: #00ff88;">✅ REPORTE TÉCNICO GENERADO (IA ENGINE)</h3>
-                        <div id="contenedorPasos" style="text-align: left; margin-top: 15px;"></div>
-                        
-                        <div id="docInfo" style="display:none; margin-top: 20px; border-top: 1px solid #30363d; padding-top: 10px; font-size: 0.8rem; color: #8b949e;">
-                            <p><strong>FUERZA DE APRIETE:</strong> Verificado por SmartWrench Engine</p>
-                            <p><strong>DOCUMENTO OEM:</strong> ${data.fuente_oficial || 'Manual Técnico General'}</p>
-                            <p><strong>ORIGEN:</strong> MongoDB Atlas Cloud</p>
-                        </div>
+        if (data.status === 'success') {
+            // 2. MOSTRAR RESULTADOS
+            output.innerHTML = `
+                <div class="res-card">
+                    <h3 style="color: #00ff88; font-family: 'Orbitron'; font-size: 0.85rem; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        ✅ INFORME GENERADO EXITOSAMENTE
+                    </h3>
+                    <div id="contenedorIA" style="text-align: left; color: #e6edf3; font-family: 'Roboto'; line-height: 1.6; font-size: 0.95rem;"></div>
+                    
+                    <div id="docInfo" style="display:none; margin-top: 25px; border-top: 1px solid #333; padding-top: 10px; font-size: 0.65rem; color: #666; font-family: 'Orbitron';">
+                        <p>PROCEDENCIA: MANUALES OEM + GEMINI VISION</p>
+                        <p>REGISTRO: ALMACENADO EN HISTORIAL MONGODB</p>
                     </div>
-                `;
+                </div>
+            `;
 
-                const contenedor = document.getElementById('contenedorPasos');
+            const contenedor = document.getElementById('contenedorIA');
+            await escribirLento(contenedor, data.analisis);
 
-                // Escribimos cada paso de forma secuencial
-                for (let i = 0; i < data.pasos.length; i++) {
-                    const pasoDiv = document.createElement('div');
-                    pasoDiv.className = "step-row";
-                    pasoDiv.style = "margin: 10px 0; border-left: 3px solid #00ff88; padding-left: 15px; background: rgba(0,255,136,0.05); min-height: 20px; color: #e6edf3;";
-                    contenedor.appendChild(pasoDiv);
-
-                    await escribirLento(pasoDiv, `PASO ${i + 1}: ${data.pasos[i]}`);
+            // Actualizar indicadores a estado activo (Verde)
+            features.forEach(f => {
+                if (f) { 
+                    f.classList.remove('scanning'); 
+                    f.classList.add('active'); 
                 }
+            });
 
-                // Al final, mostramos la info del documento con una transición suave
-                const docInfo = document.getElementById('docInfo');
-                docInfo.style.display = 'block';
-                docInfo.style.animation = 'fadeIn 1s forwards';
-
-            } else {
-                throw new Error("Datos incompletos");
-            }
-        }, 1000);
+            document.getElementById('docInfo').style.display = 'block';
+        } else {
+            throw new Error(data.analisis);
+        }
 
     } catch (error) {
-        // En caso de error, apagamos los indicadores
-        [featOEM, featTorque, featMongo].forEach(f => {
-            if (f) f.classList.remove('active', 'scanning');
-        });
+        console.error("Fallo crítico:", error);
+        
+        // Reset visual de errores
+        features.forEach(f => { if (f) f.classList.remove('scanning'); });
 
-        console.error("Error detallado:", error);
         output.innerHTML = `
-            <div style="color: #ff4444; padding: 20px; border: 1px solid #ff4444; background: rgba(255,68,68,0.1); border-radius: 8px;">
-                <p><strong>❌ ERROR CRÍTICO DE SISTEMA</strong></p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">
-                    El motor de IA no responde. Verifique el túnel y el servidor Python.
-                </p>
+            <div style="color: #ff4444; padding: 20px; border: 1px solid #ff4444; background: rgba(255,68,68,0.1); font-family: 'Orbitron';">
+                <p style="font-size: 0.9rem;">❌ ERROR DE ENLACE TÉCNICO</p>
+                <div style="font-size: 0.7rem; color: #aaa; margin-top: 15px; line-height: 1.4;">
+                    <p>CAUSA: ${error.message}</p>
+                    <p style="margin-top: 10px; color: #ffbc00;">PASOS DE RECUPERACIÓN:</p>
+                    <ul style="margin-left: 15px;">
+                        <li>Verifica que Uvicorn esté activo en el puerto 8000.</li>
+                        <li>Comprueba la conexión a Internet para MongoDB Atlas.</li>
+                        <li>Pulsa Ctrl + F5 en el navegador para recargar scripts.</li>
+                    </ul>
+                </div>
             </div>
         `;
     }
 });
+
+// Inicialización de funciones de Windows
+window.onload = openManual;

@@ -8,20 +8,66 @@
         "documentation": {}
     },
     {
-        "label": "MongoClient",
-        "importPath": "pymongo",
-        "description": "pymongo",
-        "isExtraImport": true,
-        "detail": "pymongo",
-        "documentation": {}
-    },
-    {
         "label": "certifi",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "certifi",
         "description": "certifi",
         "detail": "certifi",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "uvicorn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uvicorn",
+        "description": "uvicorn",
+        "detail": "uvicorn",
+        "documentation": {}
+    },
+    {
+        "label": "base64",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "base64",
+        "description": "base64",
+        "detail": "base64",
+        "documentation": {}
+    },
+    {
+        "label": "fitz",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "fitz",
+        "description": "fitz",
+        "detail": "fitz",
         "documentation": {}
     },
     {
@@ -33,7 +79,23 @@
         "documentation": {}
     },
     {
-        "label": "Request",
+        "label": "UploadFile",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "File",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Form",
         "importPath": "fastapi",
         "description": "fastapi",
         "isExtraImport": true,
@@ -49,21 +111,11 @@
         "documentation": {}
     },
     {
-        "label": "uvicorn",
-        "kind": 6,
+        "label": "Mistral",
+        "importPath": "mistralai",
+        "description": "mistralai",
         "isExtraImport": true,
-        "importPath": "uvicorn",
-        "description": "uvicorn",
-        "detail": "uvicorn",
-        "documentation": {}
-    },
-    {
-        "label": "sys",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
+        "detail": "mistralai",
         "documentation": {}
     },
     {
@@ -71,8 +123,17 @@
         "kind": 2,
         "importPath": "backend-ai.database_mongo",
         "description": "backend-ai.database_mongo",
-        "peekOfCode": "def obtener_conexion_db():\n    \"\"\"\n    Establece la conexión con MongoDB Atlas y devuelve la colección.\n    \"\"\"\n    uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/\"\n    try:\n        # Conectamos usando el certificado de seguridad\n        client = MongoClient(uri, tlsCAFile=certifi.where())\n        db = client['smartwrench_db']\n        # Solo devolvemos la colección, ya no borramos ni insertamos nada",
+        "peekOfCode": "def obtener_conexion_db():\n    \"\"\"\n    Establece la conexión con MongoDB Atlas y devuelve la colección.\n    Incluye mejoras de estabilidad para entornos Windows.\n    \"\"\"\n    # Tu URI de conexión (Asegúrate de que tu IP esté en la Whitelist de MongoDB Atlas)\n    uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/\"\n    try:\n        # 1. Añadimos timeout de 5 segundos para evitar que el sistema se congele\n        # 2. Forzamos el uso del certificado de certifi para evitar errores SSL en Windows",
         "detail": "backend-ai.database_mongo",
+        "documentation": {}
+    },
+    {
+        "label": "extraer_contexto_masivo",
+        "kind": 2,
+        "importPath": "backend-ai.main",
+        "description": "backend-ai.main",
+        "peekOfCode": "def extraer_contexto_masivo(pregunta_usuario):\n    \"\"\"\n    Escanea todos los PDFs en la carpeta docs buscando páginas que \n    contengan palabras clave de la pregunta del técnico.\n    \"\"\"\n    contexto = \"\"\n    # Ruta a la carpeta docs (un nivel arriba del backend)\n    ruta_docs = os.path.abspath(os.path.join(os.getcwd(), \"..\", \"docs\"))\n    # Limpiamos la pregunta para sacar palabras clave (ej: \"motor\", \"p0300\", \"aceite\")\n    keywords = [w for w in re.sub(r'[^a-zA-Z0-9 ]', '', pregunta_usuario).lower().split() if len(w) > 3]",
+        "detail": "backend-ai.main",
         "documentation": {}
     },
     {
@@ -80,16 +141,25 @@
         "kind": 5,
         "importPath": "backend-ai.main",
         "description": "backend-ai.main",
-        "peekOfCode": "app = FastAPI()\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n# --- CONFIGURACIÓN NUCLEAR PARA EL ERROR SSL ---\nuri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/?retryWrites=true&w=majority\"",
+        "peekOfCode": "app = FastAPI()\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n# 🔑 TU CLAVE DE MISTRAL\nAPI_KEY = \"KIKwmATw4aMJCY9Z5lyHCpnlXuOMhN2C\"",
         "detail": "backend-ai.main",
         "documentation": {}
     },
     {
-        "label": "uri",
+        "label": "API_KEY",
         "kind": 5,
         "importPath": "backend-ai.main",
         "description": "backend-ai.main",
-        "peekOfCode": "uri = \"mongodb+srv://afernandezsiesjc_db_user:R00tR00t*12345@smartwrench-ai.yxa4uem.mongodb.net/?retryWrites=true&w=majority\"\ntry:\n    client = MongoClient(\n        uri,\n        tls=True,\n        tlsAllowInvalidCertificates=True, # ESTO ES LO MÁS IMPORTANTE\n        tlsCAFile=certifi.where(),\n        connectTimeoutMS=5000,\n        serverSelectionTimeoutMS=5000\n    )",
+        "peekOfCode": "API_KEY = \"KIKwmATw4aMJCY9Z5lyHCpnlXuOMhN2C\"\nclient = Mistral(api_key=API_KEY)\ndef extraer_contexto_masivo(pregunta_usuario):\n    \"\"\"\n    Escanea todos los PDFs en la carpeta docs buscando páginas que \n    contengan palabras clave de la pregunta del técnico.\n    \"\"\"\n    contexto = \"\"\n    # Ruta a la carpeta docs (un nivel arriba del backend)\n    ruta_docs = os.path.abspath(os.path.join(os.getcwd(), \"..\", \"docs\"))",
+        "detail": "backend-ai.main",
+        "documentation": {}
+    },
+    {
+        "label": "client",
+        "kind": 5,
+        "importPath": "backend-ai.main",
+        "description": "backend-ai.main",
+        "peekOfCode": "client = Mistral(api_key=API_KEY)\ndef extraer_contexto_masivo(pregunta_usuario):\n    \"\"\"\n    Escanea todos los PDFs en la carpeta docs buscando páginas que \n    contengan palabras clave de la pregunta del técnico.\n    \"\"\"\n    contexto = \"\"\n    # Ruta a la carpeta docs (un nivel arriba del backend)\n    ruta_docs = os.path.abspath(os.path.join(os.getcwd(), \"..\", \"docs\"))\n    # Limpiamos la pregunta para sacar palabras clave (ej: \"motor\", \"p0300\", \"aceite\")",
         "detail": "backend-ai.main",
         "documentation": {}
     }
