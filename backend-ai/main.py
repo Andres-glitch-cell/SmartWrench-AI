@@ -5,7 +5,7 @@ import base64
 import fitz  # PyMuPDF
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from mistralai import Mistral
+from mistralai import Mistral # type: ignore
 
 app = FastAPI()
 
